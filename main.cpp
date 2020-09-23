@@ -19,8 +19,10 @@ void print_port(char *name, uint8_t *p) {
     printf("%s = %d\n", name, (p[0] << 8) + p[1]);
 }
 
-void print_data(uint8_t *p) {
-    for(int i=0;i<16;i++)
+void print_data(uint8_t *p, unsigned int len) {
+    int min = -1;
+    min = 16 < len ? 16 : len;
+    for(int i=0;i<min;i++)
         printf("%02x ", p[i]);
     printf("\n");
 }
@@ -73,7 +75,9 @@ int main(int argc, char* argv[]) {
         print_port("dst port",(uint8_t *) &tcp->th_dport);
 
         packet += (tcp->th_off * sizeof(uint32_t));
-        print_data((uint8_t *)packet);
+        unsigned int left_len = header->caplen - sizeof(struct libnet_ethernet_hdr) - sizeof(struct libnet_ipv4_hdr) - (tcp->th_off * sizeof(uint32_t));
+        printf("left lenghth : %u\n", left_len);
+        print_data((uint8_t *)packet, left_len);
     }
 
     pcap_close(handle);
